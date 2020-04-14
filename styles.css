@@ -1,5 +1,9 @@
 :root {
+	/* Colors */
 	--borders-color: #000000;
+	--active-color: green;
+
+	/* Sizes */
 	--cell-size: 10px;
 }
 
@@ -21,3 +25,6 @@ body {
     width: var(--cell-size);
     height: var(--cell-size);
 }
+
+.cell.active { background-color: var(--active-color); }
+.cell.inactive { background-color: transparent; }

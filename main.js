@@ -68,6 +68,30 @@ function setBoardTagWidth (board, cell_width)
 	return width;
 }
 
+function activateCellOnClick (board)
+{
+	const board_tag = document.getElementById (board.id);
+	let cell_tags = board_tag.getElementsByClassName ("cell");
+
+	Array.from (cell_tags).forEach (cell_tag => 
+	{
+		cell_tag.addEventListener ('click', event => 
+		{
+			if (cell_tag.classList.contains ("inactive"))
+			{
+				cell_tag.classList.remove ('inactive');
+				cell_tag.classList.add ('active');
+			}
+			else if (cell_tag.classList.contains ("active"))
+			{
+				cell_tag.classList.remove ('active');
+				cell_tag.classList.add ('inactive');
+			}
+		})
+	})
+
+}
+
 const board_width = 20;
 const board_height = 15;
 
@@ -76,6 +100,9 @@ const cell_tag_width = 10;
 window.addEventListener ('DOMContentLoaded', (event) => 
 {
 	const board = new Board ("board", board_width, board_height);
+	const board_tag = document.getElementById (board.id);
 
 	const board_tag_width = setBoardTagWidth (board, cell_tag_width);
+
+	activateCellOnClick (board);
 });
