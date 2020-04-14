@@ -19,16 +19,18 @@ class Board
 			return board;
 		}
 
-		this.createCellTag = function (cell_id)
+		this.createCellTag = function (cell)
 		{
-			let cell = document.createElement ("div");	
+			let cell_tag = document.createElement ("div");	
 			
 			const board = document.getElementById (this.id);
-			board.appendChild (cell);
+			board.appendChild (cell_tag);
 
-			cell.setAttribute ("id", cell_id);
+			cell_tag.setAttribute ("id", cell.id);
+			cell_tag.setAttribute ("class", "cell");
+			cell_tag.classList.add (cell.is_active ? "active" : "inactive");
 
-			return cell;
+			return cell_tag;
 		}
 
 		this.addCells = function ()
@@ -38,12 +40,13 @@ class Board
 			for (let i = 0; i < cells_total; i++)
 			{
 				let cell = {
-					cell_id: i,
-					cell_tag: this.createCellTag (i),
+					id: i,
 					is_active: false,
 					pos_x: (i % this.length_x),
 					pos_y: Math.floor (i / this.length_x)
 				};
+
+				this.createCellTag (cell)
 
 				this.cells.push (cell);
 			}
