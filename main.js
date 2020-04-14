@@ -47,7 +47,6 @@ class Board
 				};
 
 				this.createCellTag (cell)
-
 				this.cells.push (cell);
 			}
 		}
@@ -57,12 +56,26 @@ class Board
 	}
 }
 
-const board_width = 5;
-const board_height = 7;
+function setBoardTagWidth (board, cell_width)
+{
+	// We add the extra 'board.length_x' factor because 
+	// each single cell has a right border of 1px width.
+	let width = (board.length_x * cell_width) + board.length_x;
+
+	const board_tag = document.getElementById (board.id);
+	board_tag.setAttribute ("style", "width:" + width + "px");
+
+	return width;
+}
+
+const board_width = 20;
+const board_height = 15;
+
+const cell_tag_width = 10;
 
 window.addEventListener ('DOMContentLoaded', (event) => 
 {
 	const board = new Board ("board", board_width, board_height);
-	
-	
+
+	const board_tag_width = setBoardTagWidth (board, cell_tag_width);
 });

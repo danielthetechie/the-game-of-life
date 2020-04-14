@@ -1,3 +1,23 @@
+:root {
+	--borders-color: #000000;
+	--cell-size: 10px;
+}
+
 body {
 	background-color:#f0f0f0;
+}
+
+#board {
+	border-left: 1px solid var(--borders-color);
+	border-bottom: 1px solid var(--borders-color);
+	display: inline-flex;
+    flex-flow: wrap;
+}
+
+.cell {
+	display: inline-block;
+	border-right: 1px solid var(--borders-color);
+	border-top: 1px solid var(--borders-color);
+    width: var(--cell-size);
+    height: var(--cell-size);
 }
