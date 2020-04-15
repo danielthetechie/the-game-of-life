@@ -1,3 +1,17 @@
+///// Constants /////
+
+const ACTIVE_CLASSNAME = "active";
+const INACTIVE_CLASSNAME = "inactive";
+
+const BOARD_WIDTH = 20;
+const BOARD_HEIGHT = 15;
+
+const CELL_CLASSNAME = "cell";
+const CELL_TAG_WIDTH = 10;
+
+///////////////////
+
+
 class Board
 {
 	constructor (board_id, length_x, length_y)
@@ -27,8 +41,8 @@ class Board
 			board.appendChild (cell_tag);
 
 			cell_tag.setAttribute ("id", cell.id);
-			cell_tag.setAttribute ("class", "cell");
-			cell_tag.classList.add (cell.is_active ? "active" : "inactive");
+			cell_tag.setAttribute ("class", CELL_CLASSNAME);
+			cell_tag.classList.add (cell.is_active ? ACTIVE_CLASSNAME : INACTIVE_CLASSNAME);
 
 			return cell_tag;
 		}
@@ -68,41 +82,51 @@ function setBoardTagWidth (board, cell_width)
 	return width;
 }
 
-function activateCellOnClick (board)
+function toggleCellObjectActiveStatusById (board, id) 
+{
+	let cell = board.cells[id];
+	cell.is_active = !cell.is_active;
+
+	return cell;
+}
+
+function toggleCellClassActiveStatusByTag (cell_tag)
+{
+	if (cell_tag.classList.contains (INACTIVE_CLASSNAME))
+	{
+		cell_tag.classList.remove (INACTIVE_CLASSNAME);
+		cell_tag.classList.add (ACTIVE_CLASSNAME);
+	} else if (cell_tag.classList.contains (ACTIVE_CLASSNAME)) {
+		cell_tag.classList.remove (ACTIVE_CLASSNAME);
+		cell_tag.classList.add (INACTIVE_CLASSNAME);
+	} else {
+		// Nothing happens.
+	}
+
+	return cell_tag;
+}
+
+function toggleCellActiveStatusOnClick (board)
 {
 	const board_tag = document.getElementById (board.id);
-	let cell_tags = board_tag.getElementsByClassName ("cell");
+	let cell_tags = board_tag.getElementsByClassName (CELL_CLASSNAME);
 
 	Array.from (cell_tags).forEach (cell_tag => 
 	{
 		cell_tag.addEventListener ('click', event => 
 		{
-			if (cell_tag.classList.contains ("inactive"))
-			{
-				cell_tag.classList.remove ('inactive');
-				cell_tag.classList.add ('active');
-			}
-			else if (cell_tag.classList.contains ("active"))
-			{
-				cell_tag.classList.remove ('active');
-				cell_tag.classList.add ('inactive');
-			}
+			toggleCellObjectActiveStatusById (board, cell_tag.id);
+			toggleCellClassActiveStatusByTag (cell_tag);
 		})
 	})
-
 }
-
-const board_width = 20;
-const board_height = 15;
-
-const cell_tag_width = 10;
 
 window.addEventListener ('DOMContentLoaded', (event) => 
 {
-	const board = new Board ("board", board_width, board_height);
+	const board = new Board ("board", BOARD_WIDTH, BOARD_HEIGHT);
 	const board_tag = document.getElementById (board.id);
 
-	const board_tag_width = setBoardTagWidth (board, cell_tag_width);
+	const board_tag_width = setBoardTagWidth (board, CELL_TAG_WIDTH);
 
-	activateCellOnClick (board);
+	toggleCellActiveStatusOnClick (board);
 });
