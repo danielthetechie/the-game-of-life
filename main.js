@@ -9,8 +9,9 @@ const BOARD_HEIGHT = 15;
 const CELL_CLASSNAME = "cell";
 const CELL_TAG_WIDTH = 10;
 
-///////////////////
+const START_BUTTON_ID = "start-button";
 
+///////////////////
 
 class Board
 {
@@ -47,6 +48,10 @@ class Board
 			return cell_tag;
 		}
 
+		/*	Creates a cell JS object (which will be appended to `this.cells`)
+			and a cell HTML tag for each square of the Board. 
+			Each object and tag will share the same id.
+		*/
 		this.addCells = function ()
 		{
 			const cells_total = this.length_x * this.length_y;
@@ -70,10 +75,13 @@ class Board
 	}
 }
 
+
+/////// Helper functions /////////////
+
 function setBoardTagWidth (board, cell_width)
 {
-	// We add the extra 'board.length_x' factor because 
-	// each single cell has a right border of 1px width.
+	/* 	We add the extra 'board.length_x' factor because 
+		each single cell has a right border of 1px width. */
 	let width = (board.length_x * cell_width) + board.length_x;
 
 	const board_tag = document.getElementById (board.id);
@@ -81,6 +89,23 @@ function setBoardTagWidth (board, cell_width)
 
 	return width;
 }
+
+function getCellIdByPosition (pos_x, pos_y, board_width)
+{
+	let cell_id = null;
+
+	// No id for negative coordinates.
+	if ((pos_x * pos_y < 0) || (pos_x < 0 && pos_y < 0))
+		return null;
+
+	cell_id = (board_width * pos_y) + pos_x;
+
+	return cell_id;
+}
+
+/////////////////////////////////
+
+//// Cells activity-statuses toggle functions //////
 
 function toggleCellObjectActiveStatusById (board, id) 
 {
@@ -117,16 +142,54 @@ function toggleCellActiveStatusOnClick (board)
 		{
 			toggleCellObjectActiveStatusById (board, cell_tag.id);
 			toggleCellClassActiveStatusByTag (cell_tag);
-		})
-	})
+		});
+	});
 }
+
+/////////////////////////////
+
+
+///// Update board along generations /////////////
+
+function updateCellsToNextGen (board)
+{
+	let cells = board.cells;
+
+	for (let i = 0; i < cells.length; i++)
+	{
+		// Need to complete the logic below.
+		cell_id = getCellIdByPosition (cells[i].pos_x, cells[i].pos_y, board.length_x);
+	}
+
+	return cells;
+}
+
+function updateCellsToGen (board, to_generation)
+{
+	for (let gen = 0; gen < to_generation; gen++)
+		board.cells = updateCellsToNextGen (board);
+
+	const cells = board.cells;
+
+	return cells;
+}
+
+
+//// Main /////
 
 window.addEventListener ('DOMContentLoaded', (event) => 
 {
+	//// Initialize board ////
 	const board = new Board ("board", BOARD_WIDTH, BOARD_HEIGHT);
 	const board_tag = document.getElementById (board.id);
-
 	const board_tag_width = setBoardTagWidth (board, CELL_TAG_WIDTH);
 
 	toggleCellActiveStatusOnClick (board);
+	////////////////////////
+
+	const start_button = document.getElementById (START_BUTTON_ID);
+	start_button.addEventListener ('click', event =>
+	{
+		updateCellsToGen (board, 1);
+	});
 });
