@@ -70,6 +70,33 @@ class Board
 			}
 		}
 
+		this.syncCellActiveTagWithObjById = function (cell_id)
+		{
+			const board_tag = document.getElementById (this.id);
+			const cell_tags = board_tag.getElementsByClassName (CELL_CLASSNAME);
+
+			if (this.cells[cell_id].is_active)
+			{
+				cell_tags[cell_id].classList.remove (INACTIVE_CLASSNAME);
+				cell_tags[cell_id].classList.add (ACTIVE_CLASSNAME);	
+			} else {			
+				cell_tags[cell_id].classList.remove (INACTIVE_CLASSNAME);
+				cell_tags[cell_id].classList.add (ACTIVE_CLASSNAME);
+			}
+		}
+
+		this.syncAllCellsActivity = function ()
+		{
+			const board_tag = document.getElementById (this.id);
+			const cell_tags = board_tag.getElementsByClassName (CELL_CLASSNAME);
+			const cells_total = cell_tags.length;
+
+			for (let id = 0; id < cells_total; id++)
+			{
+				this.syncCellActiveTagWithObjById (id);
+			}
+		}
+
 		this.createBoard ();
 		this.addCells ();
 	}
@@ -158,6 +185,16 @@ function updateCellsToNextGen (board)
 	for (let i = 0; i < cells.length; i++)
 	{
 		// Need to complete the logic below.
+
+		if (cells[i].is_active)
+		{
+			cells[i + 1].is_active = true;
+			board.syncCellActiveTagWithObjById (i + 1);
+
+			// Just to avoid the domino effect for now.
+			i++;
+		}
+
 		cell_id = getCellIdByPosition (cells[i].pos_x, cells[i].pos_y, board.length_x);
 	}
 
@@ -168,6 +205,8 @@ function updateCellsToGen (board, to_generation)
 {
 	for (let gen = 0; gen < to_generation; gen++)
 		board.cells = updateCellsToNextGen (board);
+
+	console.log (board.cells)
 
 	const cells = board.cells;
 
@@ -187,9 +226,17 @@ window.addEventListener ('DOMContentLoaded', (event) =>
 	toggleCellActiveStatusOnClick (board);
 	////////////////////////
 
+	const cell_tags = board_tag.getElementsByClassName (CELL_CLASSNAME);
 	const start_button = document.getElementById (START_BUTTON_ID);
+	
 	start_button.addEventListener ('click', event =>
 	{
-		updateCellsToGen (board, 1);
+		let cells = updateCellsToGen (board, 1);
+		
+
+		Array.from (cell_tags).forEach (cell_tag => 
+		{
+			//board.syncCellsActiveTagWithObjById (cell_tag.id);
+		});
 	});
 });
