@@ -70,6 +70,20 @@ class Board
 			}
 		}
 
+		this.getCellIdByPosition = function (pos_x, pos_y)
+		{
+			let cell_id = null;
+			let board_width = this.length_x;
+
+			// No id for negative coordinates.
+			if ((pos_x * pos_y < 0) || (pos_x < 0 && pos_y < 0))
+				return null;
+
+			cell_id = (board_width * pos_y) + pos_x;
+
+			return cell_id;
+		}
+
 		this.syncCellActiveTagWithObjById = function (cell_id)
 		{
 			const board_tag = document.getElementById (this.id);
@@ -97,6 +111,51 @@ class Board
 			}
 		}
 
+		// Returns an array of cells who are neighbours of a cell whose id is cell_id.
+		this.getCellNeighboursById = function (cell_id)
+		{
+			let neighbours = [];
+
+			let x0 = this.cells[cell_id].pos_x;
+			let y0 = this.cells[cell_id].pos_y;
+
+			for (let x = x0 - 1; x <= x0 + 1; x++)
+			{
+				for (let y = y0 - 1; y <= y0 + 1; y++)
+				{
+					/*	The third condition implies that 
+						a cell can't be a neighbour of itself. */
+					if (	(x >= 0 && y >= 0) 
+						&&	(x < this.length_x && y < this.length_y) 
+						&&	(x != x0 || y != y0))
+					{
+						let neighbour_id = this.getCellIdByPosition (x, y);
+						neighbours.push (this.cells[neighbour_id]);
+					}
+				}
+			}
+
+			return neighbours;
+		}
+
+		this.countActiveNeighboursByCellId = function (cell_id)
+		{
+			let active_neighbours = 0;
+			let neighbours = this.getCellNeighboursById (cell_id);
+
+			for (let i = 0; i < neighbours.length; i++)
+				if (neighbours[i].is_active)
+					active_neighbours++;
+
+			return active_neighbours;
+		}
+
+		this.setCellActivity = function (cell_id, is_active)
+		{
+			this.cells[cell_id].is_active = is_active;
+			this.syncCellActiveTagWithObjById (cell_id);
+		}
+
 		this.createBoard ();
 		this.addCells ();
 	}
@@ -115,19 +174,6 @@ function setBoardTagWidth (board, cell_width)
 	board_tag.setAttribute ("style", "width:" + width + "px");
 
 	return width;
-}
-
-function getCellIdByPosition (pos_x, pos_y, board_width)
-{
-	let cell_id = null;
-
-	// No id for negative coordinates.
-	if ((pos_x * pos_y < 0) || (pos_x < 0 && pos_y < 0))
-		return null;
-
-	cell_id = (board_width * pos_y) + pos_x;
-
-	return cell_id;
 }
 
 /////////////////////////////////
@@ -182,20 +228,31 @@ function updateCellsToNextGen (board)
 {
 	let cells = board.cells;
 
+	/*
+		Any live cell with two or three live neighbours survives.
+		Any dead cell with three live neighbours becomes a live cell.
+		All other live cells die in the next generation. Similarly, all other dead cells stay dead.
+	*/
+
 	for (let i = 0; i < cells.length; i++)
 	{
-		// Need to complete the logic below.
+		// Reminder: i = cell_id.
+		let num_active_neighbours = board.countActiveNeighboursByCellId (i);
 
 		if (cells[i].is_active)
 		{
-			cells[i + 1].is_active = true;
-			board.syncCellActiveTagWithObjById (i + 1);
+			if (num_active_neighbours == 2 || num_active_neighbours == 3){
+				board.setCellActivity (i, true);
 
-			// Just to avoid the domino effect for now.
-			i++;
+			} else { 
+				board.setCellActivity (i, false);
+			}
+
+		} else {
+			if (num_active_neighbours == 3) {
+				board.setCellActivity (i, true);
+			}
 		}
-
-		cell_id = getCellIdByPosition (cells[i].pos_x, cells[i].pos_y, board.length_x);
 	}
 
 	return cells;
@@ -205,8 +262,6 @@ function updateCellsToGen (board, to_generation)
 {
 	for (let gen = 0; gen < to_generation; gen++)
 		board.cells = updateCellsToNextGen (board);
-
-	console.log (board.cells)
 
 	const cells = board.cells;
 
@@ -233,7 +288,6 @@ window.addEventListener ('DOMContentLoaded', (event) =>
 	{
 		let cells = updateCellsToGen (board, 1);
 		
-
 		Array.from (cell_tags).forEach (cell_tag => 
 		{
 			//board.syncCellsActiveTagWithObjById (cell_tag.id);
